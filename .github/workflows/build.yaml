@@ -33,12 +33,12 @@ jobs:
         run: |
           env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags -extldflags=-static -o dist/app-windows-amd64.exe cmd/main.go
 
-      - name: Build for Android
-        run: |
-          env CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-arm64 cmd/main.go
-          env CGO_ENABLED=0 GOOS=android GOARCH=arm go build -trimpath -ldflags -extldflags=-static -o dist/app-android-armv7 cmd/main.go
-          env CGO_ENABLED=0 GOOS=android GOARCH=386 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-386 cmd/main.go
-          env CGO_ENABLED=0 GOOS=android GOARCH=amd64 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-amd64 cmd/main.go
+      # - name: Build for Android
+      #   run: |
+      #     env CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-arm64 cmd/main.go
+      #     env CGO_ENABLED=0 GOOS=android GOARCH=arm go build -trimpath -ldflags -extldflags=-static -o dist/app-android-armv7 cmd/main.go
+      #     env CGO_ENABLED=0 GOOS=android GOARCH=386 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-386 cmd/main.go
+      #     env CGO_ENABLED=0 GOOS=android GOARCH=amd64 go build -trimpath -ldflags -extldflags=-static -o dist/app-android-amd64 cmd/main.go
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
