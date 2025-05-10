@@ -1,9 +1,5 @@
 package oogabooga
 
-import (
-	"math/big"
-)
-
 // TokenPrice represents price information for a token
 type TokenPrice struct {
 	Address string  `json:"address"`
@@ -33,7 +29,7 @@ type GetLiquiditySourcesResponse []LiquiditySource
 
 // GetAllowanceResponse represents the response for an allowance query
 type GetAllowanceResponse struct {
-	Allowance *big.Int `json:"allowance"`
+	Allowance string `json:"allowance"`
 }
 
 // Transaction represents a transaction with destination and data
@@ -49,11 +45,11 @@ type GetApproveAllowanceTxResponse struct {
 
 // SwapParams represents parameters for a swap operation
 type SwapParams struct {
-	TokenIn  string   `json:"tokenIn"`
-	TokenOut string   `json:"tokenOut"`
-	Amount   *big.Int `json:"amount"`
-	To       string   `json:"to,omitempty"`
-	Slippage float64  `json:"slippage"`
+	TokenIn  string  `json:"tokenIn"`
+	TokenOut string  `json:"tokenOut"`
+	Amount   string  `json:"amount"`
+	To       string  `json:"to,omitempty"`
+	Slippage float64 `json:"slippage"`
 }
 
 // GetSwapTxResponse represents the response for a swap transaction

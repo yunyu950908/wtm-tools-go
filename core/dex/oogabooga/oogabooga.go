@@ -68,7 +68,7 @@ func (c *Client) GetAllowance(ctx context.Context, token, from string) (GetAllow
 	// Native token does not require approvals for allowance
 	if token == "0x0000000000000000000000000000000000000000" {
 		maxUint256 := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(1))
-		return GetAllowanceResponse{Allowance: maxUint256}, nil
+		return GetAllowanceResponse{Allowance: maxUint256.String()}, nil
 	}
 
 	params := url.Values{}
@@ -96,7 +96,7 @@ func (c *Client) GetSwapTx(ctx context.Context, swapParams SwapParams) (GetSwapT
 	params := url.Values{}
 	params.Add("tokenIn", swapParams.TokenIn)
 	params.Add("tokenOut", swapParams.TokenOut)
-	params.Add("amount", swapParams.Amount.String())
+	params.Add("amount", swapParams.Amount)
 	params.Add("slippage", fmt.Sprintf("%f", swapParams.Slippage))
 
 	if swapParams.To != "" {

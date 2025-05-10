@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 	"wtm-tools-go/config"
@@ -108,8 +109,9 @@ func run(tomlContent []byte) {
 				return fmt.Errorf("failed to get token list: %w", err)
 			}
 			for _, token := range tokenList {
-				tokenInfoCache.Set(token.Address, TokenInfo{
-					Address:  token.Address,
+				address := strings.ToLower(token.Address)
+				tokenInfoCache.Set(address, TokenInfo{
+					Address:  address,
 					Symbol:   token.Symbol,
 					Decimals: token.Decimals,
 				}, cache.DefaultExpiration)
@@ -124,8 +126,9 @@ func run(tomlContent []byte) {
 				return fmt.Errorf("failed to get token prices: %w", err)
 			}
 			for _, tokenPrice := range tokenPrices {
-				tokenPriceCache.Set(tokenPrice.Address, TokenPrice{
-					Address: tokenPrice.Address,
+				address := strings.ToLower(tokenPrice.Address)
+				tokenPriceCache.Set(address, TokenPrice{
+					Address: address,
 					Price:   tokenPrice.Price,
 				}, cache.DefaultExpiration)
 				// logger.Debug().
@@ -220,14 +223,22 @@ func run(tomlContent []byte) {
 								return fmt.Errorf("failed to get allowance: %w", err)
 							}
 							// if allowance is not enough, approve
-							if allowance.Allowance.Cmp(swapAmountIn) < 0 {
+							allowanceInt, ok := new(big.Int).SetString(allowance.Allowance, 10)
+							if !ok {
+								return fmt.Errorf("failed to convert allowance to big.Int")
+							}
+							if allowanceInt.Cmp(swapAmountIn) < 0 {
 								// approve
 								approveTx, err := oogaboogaClient.GetApproveAllowanceTx(ctx, asset, utils.MAX_UINT256)
 								if err != nil {
 									return fmt.Errorf("failed to get approve allowance tx: %w", err)
 								}
 								// send tx
-								txHash, err := w.SendTransaction(ctx, berachainClient, common.HexToAddress(approveTx.Tx.To), nil, []byte(approveTx.Tx.Data))
+								approveTxData, err := utils.DecodeHexToBytes(approveTx.Tx.Data)
+								if err != nil {
+									return fmt.Errorf("failed to decode hex to bytes for approve allowance tx: %w", err)
+								}
+								txHash, err := w.SendTransaction(ctx, berachainClient, common.HexToAddress(approveTx.Tx.To), nil, approveTxData)
 								if err != nil {
 									return fmt.Errorf("failed to send approve allowance tx: %w", err)
 								}
@@ -244,7 +255,7 @@ func run(tomlContent []byte) {
 							swapTx, err := oogaboogaClient.GetSwapTx(ctx, oogabooga.SwapParams{
 								TokenIn:  asset,
 								TokenOut: stakingToken.String(),
-								Amount:   swapAmountIn,
+								Amount:   swapAmountIn.String(),
 								To:       w.Address().String(),
 								Slippage: task.AutoSwapSlippage,
 							})
@@ -252,7 +263,11 @@ func run(tomlContent []byte) {
 								return fmt.Errorf("failed to get swap tx: %w", err)
 							}
 							// send tx
-							txHash, err := w.SendTransaction(ctx, berachainClient, common.HexToAddress(swapTx.Tx.To), nil, []byte(swapTx.Tx.Data))
+							swapTxData, err := utils.DecodeHexToBytes(swapTx.Tx.Data)
+							if err != nil {
+								return fmt.Errorf("failed to decode hex to bytes for swap tx: %w", err)
+							}
+							txHash, err := w.SendTransaction(ctx, berachainClient, common.HexToAddress(swapTx.Tx.To), nil, swapTxData)
 							if err != nil {
 								return fmt.Errorf("failed to send swap tx: %w", err)
 							}

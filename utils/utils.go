@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -102,4 +103,22 @@ func FloatToBigIntWithDecimal(f float64, decimal uint8) *big.Int {
 	resultInt := new(big.Int)
 	resultFloat.Int(resultInt)
 	return resultInt
+}
+
+// DecodeHexToBytes 自动判断字符串类型并返回对应字节数组
+func DecodeHexToBytes(input string) ([]byte, error) {
+	if strings.HasPrefix(input, "0x") || strings.HasPrefix(input, "0X") {
+		data := input[2:]
+		// odd length hex string is invalid
+		if len(data)%2 != 0 {
+			data = "0" + data
+		}
+		b, err := hex.DecodeString(data)
+		if err != nil {
+			return nil, err
+		}
+		return b, nil
+	}
+	// 直接转字节
+	return []byte(input), nil
 }
