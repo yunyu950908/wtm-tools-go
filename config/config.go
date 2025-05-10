@@ -5,9 +5,6 @@ import (
 	"wtm-tools-go/utils"
 )
 
-//go:embed config.toml
-var configToml string
-
 type Config struct {
 	NodeEnv   string                     `env:"NODE_ENV"`
 	Timezone  string                     `toml:"timezone"`
@@ -69,8 +66,8 @@ type StakeConfig struct {
 	AutoSwapProvider SwapProvider  `toml:"autoSwapProvider"`
 }
 
-func Provide() Config {
-	cfg, err := Parse[Config](configToml)
+func Provide(tomlContent string) Config {
+	cfg, err := Parse[Config](tomlContent)
 	if err != nil {
 		panic(err)
 	}

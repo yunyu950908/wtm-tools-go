@@ -20,6 +20,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/patrickmn/go-cache"
+	"github.com/spf13/cobra"
 )
 
 type TokenInfo struct {
@@ -35,7 +36,43 @@ type TokenPrice struct {
 
 func main() {
 	fmt.Println("Hello, World!")
-	cfg := config.Provide()
+
+	var configFilePath string
+
+	// define root command
+	var rootCmd = &cobra.Command{
+		Use:   "wtm-tools-go",
+		Short: "wtm-tools-go",
+		Run: func(cmd *cobra.Command, args []string) {
+			// read toml content from config file
+			tomlContent, err := os.ReadFile(configFilePath)
+			if err != nil {
+				logger.Error().Err(err).Msg("Failed to read config file")
+				os.Exit(1)
+			}
+			run(tomlContent)
+		},
+	}
+
+	// add -f flag, for specifying config file path
+	rootCmd.PersistentFlags().StringVarP(&configFilePath, "file", "f", "", "config file path")
+
+	// mark config file path flag as required
+	if err := rootCmd.MarkPersistentFlagRequired("file"); err != nil {
+		logger.Error().Err(err).Msg("Failed to mark config file path flag as required")
+		os.Exit(1)
+	}
+
+	// cobra will automatically provide -h/--help
+	if err := rootCmd.Execute(); err != nil {
+		logger.Error().Err(err).Msg("Failed to execute root command")
+		os.Exit(1)
+	}
+
+}
+
+func run(tomlContent []byte) {
+	cfg := config.Provide(string(tomlContent))
 	walletConfig := config.ProvideWalletConfig(cfg)
 	rpcConfig := config.ProvideRPCConfig(cfg)
 	taskConfig := config.ProvideTaskConfig(cfg)
