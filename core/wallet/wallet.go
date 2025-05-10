@@ -74,14 +74,14 @@ func (w *Wallet) SendTransaction(
 		return "", fmt.Errorf("failed to suggest gas price: %v", err)
 	}
 
-	// // 估算 gas 数量
-	// gasLimit, err := utils.EstimateGas(ctx, client, w.address, to, value, data)
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to estimate gas: %v", err)
-	// }
+	// 估算 gas 数量
+	gasLimit, err := utils.EstimateGas(ctx, client, w.address, to, value, data)
+	if err != nil {
+		return "", fmt.Errorf("failed to estimate gas: %v", err)
+	}
 
 	// 创建交易
-	tx := types.NewTransaction(nonce, to, value, 1000000, gasPrice, data)
+	tx := types.NewTransaction(nonce, to, value, uint64(float64(gasLimit)*1.2), gasPrice, data)
 
 	// 签名交易
 	signer, err := w.GetSigner(ctx, client)
