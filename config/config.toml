@@ -1,0 +1,52 @@
+name = "wtm-tools-go"
+timezone = "Asia/Shanghai"
+
+[task]
+[task.default]
+
+[[task.default.claim]]
+name = "claim infrared vault [infrared:ibgt]"
+cron = "0 */4 * * *"
+provider = "INFRARED"
+vaultAddress = "0x75f3be06b02e235f6d0e7ef2d462b29739168301"
+# https://berascan.com/address/0x75f3be06b02e235f6d0e7ef2d462b29739168301#code
+
+
+[[task.default.claim]]
+name = "claim infrared vault [kodiak:ibera-ibgt]"
+cron = "0 */4 * * *"
+provider = "INFRARED"
+vaultAddress = "0xe5c36544c295e88c37024736cef3a46e40650542"
+# https://berascan.com/address/0xe5c36544c295e88c37024736cef3a46e40650542#code
+
+[[task.default.stake]]
+name = "stake infrared vault [infrared:ibgt]"
+cron = "0 */4 * * *"
+provider = "INFRARED"
+vaultAddress = "0x75f3be06b02e235f6d0e7ef2d462b29739168301"
+# https://berascan.com/address/0x75f3be06b02e235f6d0e7ef2d462b29739168301#code
+minAmountInUSD = 1   # at least 1 USD
+maxAmountInUSD = 100 # at most 100 USD
+# auto swap from whitelisted assets and then stake into target vault
+autoSwap = true # auto swap from whitelisted assets
+autoSwapAssets = [
+    "0x6969696969696969696969696969696969696969", # WBERA
+    "0xfcbd14dc51f0a4d49d5e53c2e0950e0bc26d0dce", # HONEY
+]
+autoSwapSlippage = 0.005 # 0.5%
+autoSwapProvider = "OOGABOOGA"
+
+[oogabooga]
+[oogabooga.default]
+baseURL = "https://mainnet.api.oogabooga.io"
+apiKey = "OOGABOOGA_API_KEY"
+
+[wallet]
+[wallet.default]
+privateKeyHead = "PRIVATE_KEY_HEAD"
+privateKeyTail = "PRIVATE_KEY_TAIL"
+
+[rpc]
+[rpc.default]
+berachainHttp = "https://rpc.berachain.com/"
+berachainWs = ""
