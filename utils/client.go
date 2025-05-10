@@ -5,10 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strconv"
 	"time"
+	"wtm-tools-go/internal/sc"
 	"wtm-tools-go/logger"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -114,4 +117,39 @@ func GetChainID(ctx context.Context, client *ethclient.Client) (*big.Int, error)
 		return nil, err
 	}
 	return chainID, nil
+}
+
+type TokenBalance struct {
+	Balance  *big.Int
+	Amount   float64 // human readable amount
+	Decimals uint8
+}
+
+func CheckBalance(ctx context.Context, tokenAddress string, walletAddress common.Address, client *ethclient.Client) (*TokenBalance, error) {
+	erc20, err := sc.NewERC20(common.HexToAddress(tokenAddress), client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create erc20: %w", err)
+	}
+	balance, err := erc20.BalanceOf(&bind.CallOpts{
+		Context: ctx,
+	}, walletAddress)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get balance: %w", err)
+	}
+	decimals, err := erc20.Decimals(&bind.CallOpts{
+		Context: ctx,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get decimals: %w", err)
+	}
+	amountStr := FormatUnits(balance, int(decimals), 6)
+	amountFloat, err := strconv.ParseFloat(amountStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse amount: %w", err)
+	}
+	return &TokenBalance{
+		Balance:  balance,
+		Amount:   amountFloat,
+		Decimals: decimals,
+	}, nil
 }
