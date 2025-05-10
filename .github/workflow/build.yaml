@@ -1,0 +1,47 @@
+name: Go Cross-build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'    # 仅打标签时触发
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.2'
+
+    - name: Build for Linux
+      run: |
+        mkdir -p dist
+        env GOOS=linux GOARCH=amd64 go build -o dist/app-linux-amd64 main.go
+
+    - name: Build for macOS
+      run: |
+        env GOOS=darwin GOARCH=amd64 go build -o dist/app-darwin-amd64 main.go
+        env GOOS=darwin GOARCH=arm64 go build -o dist/app-darwin-arm64 main.go
+
+    - name: Build for Windows
+      run: |
+        env GOOS=windows GOARCH=amd64 go build -o dist/app-windows-amd64.exe main.go
+
+    - name: Build for Android
+      run: |
+        env GOOS=android GOARCH=arm64 go build -o dist/app-android-arm64 main.go
+        env GOOS=android GOARCH=arm go build -o dist/app-android-armv7 main.go
+        env GOOS=android GOARCH=386 go build -o dist/app-android-386 main.go
+        env GOOS=android GOARCH=amd64 go build -o dist/app-android-amd64 main.go
+
+    - name: Create Release and Upload Assets
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
