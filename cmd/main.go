@@ -179,7 +179,11 @@ func run(tomlContent []byte) {
 				// check if this token is available in oogabooga
 				_, ok := tokenPriceCache.Get(stakingToken.String())
 				if !ok {
-					logger.Info().Msg("staking token price not found, staking all")
+					if remainedStakingTokenBalance.Balance.Cmp(big.NewInt(0)) < 0 {
+						logger.Info().Str("token", stakingToken.String()).Msg("staking token price not found, and balance is 0, skip")
+						return nil
+					}
+					logger.Info().Str("token", stakingToken.String()).Msg("staking token price not found, staking all")
 					// stake
 					return vault.Stake(ctx, remainedStakingTokenBalance.Balance)
 				}
@@ -211,6 +215,7 @@ func run(tomlContent []byte) {
 							valueInUSD := assetBalance.Amount * cachedTokenPrice.Price
 							// value in USD is too low, skip
 							if valueInUSD < 1 {
+								logger.Info().Msgf("asset %s value in USD is too low, skip: %.2f", asset, valueInUSD)
 								continue
 							}
 							if valueInUSD >= task.MaxAmountInUSD {
