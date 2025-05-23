@@ -122,7 +122,9 @@ func (c *Client) get(ctx context.Context, path string, result interface{}) error
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("API request failed with status code: %d", resp.StatusCode)
